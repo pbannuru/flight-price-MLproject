@@ -74,10 +74,10 @@ class DataIngestion:
             logging.info(f"Reading excel file: [{flight_fare_file_path}]")
             flight_fare_data_frame = pd.read_excel(flight_fare_file_path)
 
-            flight_fare_data_frame["income_cat"] = pd.cut(
-                flight_fare_data_frame["median_income"],
-                bins=[0.0, 1.5, 3.0, 4.5, 6.0, np.inf],
-                labels=[1,2,3,4,5]
+            flight_fare_data_frame["Price_cat"] = pd.cut(
+                flight_fare_data_frame["Price"],
+                bins=[1500,5000,10000,20000,30000,40000,50000,60000,70000, np.inf],
+                labels=[1,2,3,4,5,6,7,8,9]
             )
             
 
@@ -87,9 +87,9 @@ class DataIngestion:
 
             split = StratifiedShuffleSplit(n_splits=1, test_size=0.2, random_state=42)
 
-            for train_index,test_index in split.split(flight_fare_data_frame, flight_fare_data_frame["income_cat"]):
-                strat_train_set = flight_fare_data_frame.loc[train_index].drop(["income_cat"],axis=1)
-                strat_test_set = flight_fare_data_frame.loc[test_index].drop(["income_cat"],axis=1)
+            for train_index,test_index in split.split(flight_fare_data_frame, flight_fare_data_frame["Price_cat"]):
+                strat_train_set = flight_fare_data_frame.loc[train_index].drop(["Price_cat"],axis=1)
+                strat_test_set = flight_fare_data_frame.loc[test_index].drop(["Price_cat"],axis=1)
 
             train_file_path = os.path.join(self.data_ingestion_config.ingested_train_dir,
                                             file_name)
