@@ -10,7 +10,7 @@ mailid = pbannuru@gmail.com
 
 herokukey = f2ccae77-156e-4e59-be69-59531739708c
 
-app name = stores-sales-ml
+app name = flight-fare-ml
 
 
 
