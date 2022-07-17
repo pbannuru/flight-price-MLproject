@@ -1,7 +1,7 @@
 columns:
   longitude: float
   latitude: float
-  housing_median_age: float
+  flight_fare_median_age: float
   total_rooms: float
   total_bedrooms: float
   population: float
@@ -13,7 +13,7 @@ columns:
 numerical_columns:
   - longitude
   - latitude
-  - housing_median_age
+  - flight_fare_median_age
   - total_rooms
   - total_bedrooms
   - population

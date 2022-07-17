@@ -3,7 +3,7 @@ from datetime import datetime
 import os
 import pandas as pd
 from flight_fare.constant import get_current_time_stamp 
-LOG_DIR="housing_logs"
+LOG_DIR="flight_fare_logs"
 
 def get_log_file_name():
     return f"log_{get_current_time_stamp()}.log"

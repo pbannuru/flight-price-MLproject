@@ -1,26 +1,26 @@
 from collections import namedtuple
 from datetime import datetime
 import uuid
-from housing.config.configuration import Configuartion
-from housing.logger import logging, get_log_file_name
-from housing.exception import HousingException
+from flight_fare.config.configuration import Configuartion
+from flight_fare.logger import logging, get_log_file_name
+from flight_fare.exception import flight_fareException
 from threading import Thread
 from typing import List
 from multiprocessing import Process
-from housing.entity.artifact_entity import ModelPusherArtifact, DataIngestionArtifact, ModelEvaluationArtifact
-from housing.entity.artifact_entity import DataValidationArtifact, DataTransformationArtifact, ModelTrainerArtifact
-from housing.entity.config_entity import DataIngestionConfig, ModelEvaluationConfig
-from housing.component.data_ingestion import DataIngestion
-from housing.component.data_validation import DataValidation
-from housing.component.data_transformation import DataTransformation
-from housing.component.model_trainer import ModelTrainer
-from housing.component.model_evaluation import ModelEvaluation
-from housing.component.model_pusher import ModelPusher
+from flight_fare.entity.artifact_entity import ModelPusherArtifact, DataIngestionArtifact, ModelEvaluationArtifact
+from flight_fare.entity.artifact_entity import DataValidationArtifact, DataTransformationArtifact, ModelTrainerArtifact
+from flight_fare.entity.config_entity import DataIngestionConfig, ModelEvaluationConfig
+from flight_fare.component.data_ingestion import DataIngestion
+from flight_fare.component.data_validation import DataValidation
+from flight_fare.component.data_transformation import DataTransformation
+from flight_fare.component.model_trainer import ModelTrainer
+from flight_fare.component.model_evaluation import ModelEvaluation
+from flight_fare.component.model_pusher import ModelPusher
 import os, sys
 from collections import namedtuple
 from datetime import datetime
 import pandas as pd
-from housing.constant import EXPERIMENT_DIR_NAME, EXPERIMENT_FILE_NAME
+from flight_fare.constant import EXPERIMENT_DIR_NAME, EXPERIMENT_FILE_NAME
 
 Experiment = namedtuple("Experiment", ["experiment_id", "initialization_timestamp", "artifact_time_stamp",
                                        "running_status", "start_time", "stop_time", "execution_time", "message",
@@ -41,14 +41,14 @@ class Pipeline(Thread):
             super().__init__(daemon=False, name="pipeline")
             self.config = config
         except Exception as e:
-            raise HousingException(e, sys) from e
+            raise flight_fareException(e, sys) from e
 
     def start_data_ingestion(self) -> DataIngestionArtifact:
         try:
             data_ingestion = DataIngestion(data_ingestion_config=self.config.get_data_ingestion_config())
             return data_ingestion.initiate_data_ingestion()
         except Exception as e:
-            raise HousingException(e, sys) from e
+            raise flight_fareException(e, sys) from e
 
     def start_data_validation(self, data_ingestion_artifact: DataIngestionArtifact) \
             -> DataValidationArtifact:
@@ -58,7 +58,7 @@ class Pipeline(Thread):
                                              )
             return data_validation.initiate_data_validation()
         except Exception as e:
-            raise HousingException(e, sys) from e
+            raise flight_fareException(e, sys) from e
 
     def start_data_transformation(self,
                                   data_ingestion_artifact: DataIngestionArtifact,
@@ -72,7 +72,7 @@ class Pipeline(Thread):
             )
             return data_transformation.initiate_data_transformation()
         except Exception as e:
-            raise HousingException(e, sys)
+            raise flight_fareException(e, sys)
 
     def start_model_trainer(self, data_transformation_artifact: DataTransformationArtifact) -> ModelTrainerArtifact:
         try:
@@ -81,7 +81,7 @@ class Pipeline(Thread):
                                          )
             return model_trainer.initiate_model_trainer()
         except Exception as e:
-            raise HousingException(e, sys) from e
+            raise flight_fareException(e, sys) from e
 
     def start_model_evaluation(self, data_ingestion_artifact: DataIngestionArtifact,
                                data_validation_artifact: DataValidationArtifact,
@@ -94,7 +94,7 @@ class Pipeline(Thread):
                 model_trainer_artifact=model_trainer_artifact)
             return model_eval.initiate_model_evaluation()
         except Exception as e:
-            raise HousingException(e, sys) from e
+            raise flight_fareException(e, sys) from e
 
     def start_model_pusher(self, model_eval_artifact: ModelEvaluationArtifact) -> ModelPusherArtifact:
         try:
@@ -104,7 +104,7 @@ class Pipeline(Thread):
             )
             return model_pusher.initiate_model_pusher()
         except Exception as e:
-            raise HousingException(e, sys) from e
+            raise flight_fareException(e, sys) from e
 
     def run_pipeline(self):
         try:
@@ -167,7 +167,7 @@ class Pipeline(Thread):
             logging.info(f"Pipeline experiment: {Pipeline.experiment}")
             self.save_experiment()
         except Exception as e:
-            raise HousingException(e, sys) from e
+            raise flight_fareException(e, sys) from e
 
     def run(self):
         try:
@@ -190,22 +190,22 @@ class Pipeline(Thread):
 
                 os.makedirs(os.path.dirname(Pipeline.experiment_file_path), exist_ok=True)
                 if os.path.exists(Pipeline.experiment_file_path):
-                    experiment_report.to_csv(Pipeline.experiment_file_path, index=False, header=False, mode="a")
+                    experiment_report.to_excel(Pipeline.experiment_file_path, index=False, header=False, mode="a")
                 else:
-                    experiment_report.to_csv(Pipeline.experiment_file_path, mode="w", index=False, header=True)
+                    experiment_report.to_excel(Pipeline.experiment_file_path, mode="w", index=False, header=True)
             else:
                 print("First start experiment")
         except Exception as e:
-            raise HousingException(e, sys) from e
+            raise flight_fareException(e, sys) from e
 
     @classmethod
     def get_experiments_status(cls, limit: int = 5) -> pd.DataFrame:
         try:
             if os.path.exists(Pipeline.experiment_file_path):
-                df = pd.read_csv(Pipeline.experiment_file_path)
+                df = pd.read_excel(Pipeline.experiment_file_path)
                 limit = -1 * int(limit)
                 return df[limit:].drop(columns=["experiment_file_path", "initialization_timestamp"], axis=1)
             else:
                 return pd.DataFrame()
         except Exception as e:
-            raise HousingException(e, sys) from e
+            raise flight_fareException(e, sys) from e

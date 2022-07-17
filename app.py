@@ -2,22 +2,22 @@ from flask import Flask, request
 import sys
 
 import pip
-from housing.util.util import read_yaml_file, write_yaml_file
+from flight_fare.util.util import read_yaml_file, write_yaml_file
 from matplotlib.style import context
-from housing.logger import logging
-from housing.exception import HousingException
+from flight_fare.logger import logging
+from flight_fare.exception import flight_fareException
 import os, sys
 import json
-from housing.config.configuration import Configuartion
-from housing.constant import CONFIG_DIR, get_current_time_stamp
-from housing.pipeline.pipeline import Pipeline
-from housing.entity.housing_predictor import HousingPredictor, HousingData
+from flight_fare.config.configuration import Configuartion
+from flight_fare.constant import CONFIG_DIR, get_current_time_stamp
+from flight_fare.pipeline.pipeline import Pipeline
+from flight_fare.entity.flight_fare_predictor import flight_farePredictor, flight_fareData
 from flask import send_file, abort, render_template
 
 
 ROOT_DIR = os.getcwd()
 LOG_FOLDER_NAME = "logs"
-PIPELINE_FOLDER_NAME = "housing"
+PIPELINE_FOLDER_NAME = "flight_fare"
 SAVED_MODELS_DIR_NAME = "saved_models"
 MODEL_CONFIG_FILE_PATH = os.path.join(ROOT_DIR, CONFIG_DIR, "model.yaml")
 LOG_DIR = os.path.join(ROOT_DIR, LOG_FOLDER_NAME)
@@ -25,18 +25,18 @@ PIPELINE_DIR = os.path.join(ROOT_DIR, PIPELINE_FOLDER_NAME)
 MODEL_DIR = os.path.join(ROOT_DIR, SAVED_MODELS_DIR_NAME)
 
 
-from housing.logger import get_log_dataframe
+from flight_fare.logger import get_log_dataframe
 
-HOUSING_DATA_KEY = "housing_data"
-MEDIAN_HOUSING_VALUE_KEY = "median_house_value"
+flight_fare_DATA_KEY = "flight_fare_data"
+MEDIAN_flight_fare_VALUE_KEY = "median_house_value"
 
 app = Flask(__name__)
 
 
-@app.route('/artifact', defaults={'req_path': 'housing'})
+@app.route('/artifact', defaults={'req_path': 'flight_fare'})
 @app.route('/artifact/<path:req_path>')
 def render_artifact_dir(req_path):
-    os.makedirs("housing", exist_ok=True)
+    os.makedirs("flight_fare", exist_ok=True)
     # Joining the base and the requested path
     print(f"req_path: {req_path}")
     abs_path = os.path.join(req_path)
@@ -103,14 +103,14 @@ def train():
 @app.route('/predict', methods=['GET', 'POST'])
 def predict():
     context = {
-        HOUSING_DATA_KEY: None,
-        MEDIAN_HOUSING_VALUE_KEY: None
+        flight_fare_DATA_KEY: None,
+        MEDIAN_flight_fare_VALUE_KEY: None
     }
 
     if request.method == 'POST':
         longitude = float(request.form['longitude'])
         latitude = float(request.form['latitude'])
-        housing_median_age = float(request.form['housing_median_age'])
+        flight_fare_median_age = float(request.form['flight_fare_median_age'])
         total_rooms = float(request.form['total_rooms'])
         total_bedrooms = float(request.form['total_bedrooms'])
         population = float(request.form['population'])
@@ -118,9 +118,9 @@ def predict():
         median_income = float(request.form['median_income'])
         ocean_proximity = request.form['ocean_proximity']
 
-        housing_data = HousingData(longitude=longitude,
+        flight_fare_data = flight_fareData(longitude=longitude,
                                    latitude=latitude,
-                                   housing_median_age=housing_median_age,
+                                   flight_fare_median_age=flight_fare_median_age,
                                    total_rooms=total_rooms,
                                    total_bedrooms=total_bedrooms,
                                    population=population,
@@ -128,12 +128,12 @@ def predict():
                                    median_income=median_income,
                                    ocean_proximity=ocean_proximity,
                                    )
-        housing_df = housing_data.get_housing_input_data_frame()
-        housing_predictor = HousingPredictor(model_dir=MODEL_DIR)
-        median_housing_value = housing_predictor.predict(X=housing_df)
+        flight_fare_df = flight_fare_data.get_flight_fare_input_data_frame()
+        flight_fare_predictor = flight_farePredictor(model_dir=MODEL_DIR)
+        median_flight_fare_value = flight_fare_predictor.predict(X=flight_fare_df)
         context = {
-            HOUSING_DATA_KEY: housing_data.get_housing_data_as_dict(),
-            MEDIAN_HOUSING_VALUE_KEY: median_housing_value,
+            flight_fare_DATA_KEY: flight_fare_data.get_flight_fare_data_as_dict(),
+            MEDIAN_flight_fare_VALUE_KEY: median_flight_fare_value,
         }
         return render_template('predict.html', context=context)
     return render_template("predict.html", context=context)

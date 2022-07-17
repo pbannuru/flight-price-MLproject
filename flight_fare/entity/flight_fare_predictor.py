@@ -12,7 +12,7 @@ class flight_fareData:
     def __init__(self,
                  longitude: float,
                  latitude: float,
-                 housing_median_age: float,
+                 flight_fare_median_age: float,
                  total_rooms: float,
                  total_bedrooms: float,
                  population: float,
@@ -24,7 +24,7 @@ class flight_fareData:
         try:
             self.longitude = longitude
             self.latitude = latitude
-            self.housing_median_age = housing_median_age
+            self.flight_fare_median_age = flight_fare_median_age
             self.total_rooms = total_rooms
             self.total_bedrooms = total_bedrooms
             self.population = population
@@ -35,20 +35,20 @@ class flight_fareData:
         except Exception as e:
             raise flight_fareException(e, sys) from e
 
-    def get_housing_input_data_frame(self):
+    def get_flight_fare_input_data_frame(self):
 
         try:
-            housing_input_dict = self.get_housing_data_as_dict()
-            return pd.DataFrame(housing_input_dict)
+            flight_fare_input_dict = self.get_flight_fare_data_as_dict()
+            return pd.DataFrame(flight_fare_input_dict)
         except Exception as e:
             raise flight_fareException(e, sys) from e
 
-    def get_housing_data_as_dict(self):
+    def get_flight_fare_data_as_dict(self):
         try:
             input_data = {
                 "longitude": [self.longitude],
                 "latitude": [self.latitude],
-                "housing_median_age": [self.housing_median_age],
+                "flight_fare_median_age": [self.flight_fare_median_age],
                 "total_rooms": [self.total_rooms],
                 "total_bedrooms": [self.total_bedrooms],
                 "population": [self.population],
@@ -60,7 +60,7 @@ class flight_fareData:
             raise flight_fareException(e, sys)
 
 
-class HousingPredictor:
+class flight_farePredictor:
 
     def __init__(self, model_dir: str):
         try:
